@@ -1,32 +1,43 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
     <router-view />
+    <p class="footer">
+      Created by Paddy. The project is on <a href="https://github.com/paddyohanlon/happy-body-tools">GitHub</a>.
+    </p>
   </div>
 </template>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+@import "~normalize.css/normalize.css";
+
+:root {
+  --color-heading: #504d40;
+  --color-th-bg-col: #5f5e5c;
+  --color-th-bg-row: #808080;
+  --color-td-bg-a: #aaa9a9;
+  --color-td-bg-b: #6c6b64;
 }
 
-#nav {
-  padding: 30px;
+body {
+  color: #333;
+  font-family: georgia, serif;
+  padding: 1em;
+  text-align: center;
+}
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-heading);
+  font-family: sans-serif;
+}
 
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+.footer {
+  border-top: 1px solid var(--color-heading);
+  margin-top: 2em;
+  padding-top: 2em;
 }
 </style>
