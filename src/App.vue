@@ -1,5 +1,9 @@
 <template>
   <div id="app">
+    <ul class="nav">
+      <li><router-link :to="{ name: 'home' }">Weights</router-link></li>
+      <li><router-link :to="{ name: 'measurements' }">Measurements</router-link></li>
+    </ul>
     <router-view />
     <p class="footer">
       Created by Paddy. The project is on <a href="https://github.com/paddyohanlon/happy-body-tools">GitHub</a>.
@@ -39,5 +43,9 @@ h6 {
   border-top: 1px solid var(--color-heading);
   margin-top: 2em;
   padding-top: 2em;
+}
+
+.nav {
+  list-style: none;
 }
 </style>

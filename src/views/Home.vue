@@ -191,7 +191,7 @@ import { Component, Vue } from "vue-property-decorator";
 @Component
 export default class Home extends Vue {
   baseWeight = 5;
-  unit = "lb";
+  unit = "kg";
 
   weight(multipdiver = 1) {
     return `${this.baseWeight * multipdiver}${this.unit}`;
