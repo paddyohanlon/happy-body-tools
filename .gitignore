@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-#/dist # comment out so it will push to Heroku
+/dist
 PSDs
 
 # local env files
