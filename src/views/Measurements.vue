@@ -9,9 +9,9 @@
       <input id="body-weight" v-model="bodyWeight" type="number" />{{ kg }} ({{ bodyWeightLb.toFixed(2) }}{{ lb }})
     </div>
 
-    <div><input id="size-chest" v-model.number="sizeChest" type="number" />cm</div>
-    <div><input id="size-belly" v-model.number="sizeBelly" type="number" />cm</div>
-    <div><input id="size-thigh" v-model.number="sizeThigh" type="number" />cm</div>
+    <div>Chest: <input id="size-chest" v-model.number="sizeChest" type="number" />cm</div>
+    <div>Belly: <input id="size-belly" v-model.number="sizeBelly" type="number" />cm</div>
+    <div>Thigh: <input id="size-thigh" v-model.number="sizeThigh" type="number" />cm</div>
     <div>Total size: {{ sizeTotal.toFixed(2) }}{{ cm }} ({{ sizeTotalLb.toFixed(2) }}{{ inch }})</div>
     <div>Body fat: {{ fatPercent * 100 }}% ({{ fatWeight.toFixed(2) }}{{ kg }})</div>
     <div>Body muscle: {{ (1 - fatPercent) * 100 }}% ({{ muscleWeight.toFixed(2) }}{{ kg }})</div>
@@ -40,9 +40,9 @@ export default class Measurements extends Vue {
   kgInLb = 2.204623;
   cmInInch = 0.3937;
 
-  sizeChest = 1.2;
-  sizeBelly = 1.5;
-  sizeThigh = 1.1;
+  sizeChest = 0.9;
+  sizeBelly = 1.2;
+  sizeThigh = 1;
 
   fatLossPerWeekRate = 0.795454;
   muscleGainPerWeekRate = 0.1587573;
