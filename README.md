@@ -6,7 +6,7 @@ The one and only tool helps calculates the different weight percentages and dumb
 
 ## Heroku notes
 
-Touching to force redeploy.
+Touching to force redeploy..
 
 Requires the RethinkDB Cloud Add-on:
 
