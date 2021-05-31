@@ -28,20 +28,18 @@ app.get(`${apiURLBase}/users`, async (req, res) => {
   console.log("Get users");
 
   const conn = await getRethinkDB();
-  r.table(usersTable)
-    .getAll()
-    .run(conn, (err, cursor) => {
+  r.table(usersTable).run(conn, (err, cursor) => {
+    if (err) throw err;
+    cursor.toArray((err, result) => {
       if (err) throw err;
-      cursor.toArray((err, result) => {
-        if (err) throw err;
-        if (result) {
-          console.log("Users:", JSON.stringify(result, null, 2));
-          return res.send(result);
-        } else {
-          return res.status(404).send({ message: "Cannot get users" });
-        }
-      });
+      if (result) {
+        console.log("Users:", JSON.stringify(result, null, 2));
+        return res.send(result);
+      } else {
+        return res.status(404).send({ message: "Cannot get users" });
+      }
     });
+  });
 });
 
 app.get(`${apiURLBase}/users/:userId`, async (req, res) => {
