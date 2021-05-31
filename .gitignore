@@ -2,6 +2,7 @@
 node_modules
 /dist
 PSDs
+rethinkdb-backup.tar.gz
 
 # local env files
 .env.local

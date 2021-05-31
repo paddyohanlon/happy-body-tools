@@ -24,11 +24,13 @@
       <div class="card">
         <form @submit.prevent="saveMeasurement">
           <div>
-            Body Weight: <input id="body-weight" v-model.number="newMeasurement.weight" type="number" />{{ kg }}
+            Body Weight: <input id="body-weight" v-model.number="newMeasurement.weight" type="number" step="0.01" />{{
+              kg
+            }}
           </div>
-          <div>Chest: <input id="size-chest" v-model.number="newMeasurement.chest" type="number" />cm</div>
-          <div>Belly: <input id="size-belly" v-model.number="newMeasurement.belly" type="number" />cm</div>
-          <div>Thigh: <input id="size-thigh" v-model.number="newMeasurement.thigh" type="number" />cm</div>
+          <div>Chest: <input id="size-chest" v-model.number="newMeasurement.chest" type="number" step="0.01" />cm</div>
+          <div>Belly: <input id="size-belly" v-model.number="newMeasurement.belly" type="number" step="0.01" />cm</div>
+          <div>Thigh: <input id="size-thigh" v-model.number="newMeasurement.thigh" type="number" step="0.01" />cm</div>
           <button>Save</button>
         </form>
       </div>
