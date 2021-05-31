@@ -24,6 +24,18 @@ const usersTable = "users";
 const measurementsTable = "measurements";
 
 // routes
+app.delete(`${apiURLBase}/db/:table`, async (req, res) => {
+  const table = req.params.table;
+  console.log("Drop db table:", table);
+
+  const conn = await getRethinkDB();
+  r.tableDrop(table).run(conn, (err, result) => {
+    if (err) throw err;
+    console.log("Delete result:", result);
+    return res.status(200).send({ message: "Deleted table" });
+  });
+});
+
 app.get(`${apiURLBase}/users`, async (req, res) => {
   console.log("Get users");
 
