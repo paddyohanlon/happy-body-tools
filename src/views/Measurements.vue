@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div v-if="user && measurements.length > 0">
+    <div v-if="user.id != 0">
       <h1>Measurements</h1>
 
       <!-- Stats -->
-      <div class="card">
+      <div class="card" v-if="measurements.length > 0">
         <ul>
           <li>Current weight: {{ measurements[0].weight }}{{ kg }}</li>
           <li>Goal weight total: {{ user.goalWeight.toFixed(2) }}{{ kg }}</li>
@@ -36,7 +36,7 @@
       </div>
 
       <!-- Measurements -->
-      <div class="card">
+      <div class="card" v-if="measurements.length > 0">
         <table>
           <thead>
             <tr>
