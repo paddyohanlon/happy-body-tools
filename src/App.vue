@@ -26,7 +26,6 @@ body {
   color: #333;
   font-family: georgia, serif;
   padding: 1em;
-  text-align: center;
 }
 
 h1,
@@ -37,6 +36,15 @@ h5,
 h6 {
   color: var(--color-heading);
   font-family: sans-serif;
+}
+
+th {
+  text-align: left;
+}
+
+th,
+td {
+  padding: 0.5em;
 }
 
 .footer {

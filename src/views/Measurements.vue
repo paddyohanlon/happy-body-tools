@@ -1,37 +1,129 @@
 <template>
   <div>
-    <h1>Measurements</h1>
+    <div v-if="user && measurements.length > 0">
+      <h1>Measurements</h1>
 
-    <div>
-      <label for="body-weight">Body Weight</label>
-    </div>
-    <div>
-      <input id="body-weight" v-model="bodyWeight" type="number" />{{ kg }} ({{ bodyWeightLb.toFixed(2) }}{{ lb }})
-    </div>
+      <!-- Stats -->
+      <div class="card">
+        <ul>
+          <li>Current weight: {{ measurements[0].weight }}{{ kg }}</li>
+          <li>Goal weight total: {{ user.goalWeight.toFixed(2) }}{{ kg }}</li>
+          <li>Goal weight fat: {{ this.goalWeightFat.toFixed(2) }}{{ kg }} (10%)</li>
+          <li>Goal weight muscle: {{ muscleWeightGoal.toFixed(2) }}{{ kg }} (90%)</li>
+          <li>
+            Fat to lose: {{ fatWeightToLose.toFixed(2) }}{{ kg }} (weeks remaining: {{ weeksToFatGoal.toFixed(2) }})
+          </li>
+          <li>
+            Muscle to gain: {{ muscleWeightToGain.toFixed(2) }}{{ kg }} (weeks remaining:
+            {{ weeksToMuscleGoal.toFixed(2) }})
+          </li>
+        </ul>
+      </div>
 
-    <div>Chest: <input id="size-chest" v-model.number="sizeChest" type="number" />cm</div>
-    <div>Belly: <input id="size-belly" v-model.number="sizeBelly" type="number" />cm</div>
-    <div>Thigh: <input id="size-thigh" v-model.number="sizeThigh" type="number" />cm</div>
-    <div>Total size: {{ sizeTotal.toFixed(2) }}{{ cm }} ({{ sizeTotalLb.toFixed(2) }}{{ inch }})</div>
-    <div>Body fat: {{ fatPercent * 100 }}% ({{ fatWeight.toFixed(2) }}{{ kg }})</div>
-    <div>Body muscle: {{ (1 - fatPercent) * 100 }}% ({{ muscleWeight.toFixed(2) }}{{ kg }})</div>
-    <hr />
-    <div>
-      Goal weight: {{ goalWeight }}{{ kg }} (goal fat: {{ goalWeight * 0.1 }}{{ kg }} [10%] | goal muscle:
-      {{ goalWeight * 0.9 }}{{ kg }} [90%])
+      <!-- Form -->
+      <div class="card">
+        <form @submit.prevent="saveMeasurement">
+          <div>
+            Body Weight: <input id="body-weight" v-model.number="newMeasurement.weight" type="number" />{{ kg }}
+          </div>
+          <div>Chest: <input id="size-chest" v-model.number="newMeasurement.chest" type="number" />cm</div>
+          <div>Belly: <input id="size-belly" v-model.number="newMeasurement.belly" type="number" />cm</div>
+          <div>Thigh: <input id="size-thigh" v-model.number="newMeasurement.thigh" type="number" />cm</div>
+          <button>Save</button>
+        </form>
+      </div>
+
+      <!-- Measurements -->
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Weight</th>
+              <th>Size</th>
+              <th>Fat</th>
+              <th>Muscle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="measurement in measurements" :key="measurement.id">
+              <td>{{ new Date(measurement.date).toLocaleDateString() }}</td>
+              <td>{{ measurement.weight }}{{ kg }}</td>
+              <td>{{ sizeTotal(measurement).toFixed(2) }}cm</td>
+              <td>{{ fatPercent(measurement) * 100 }}% ({{ fatWeight(measurement).toFixed(2) }}{{ kg }})</td>
+              <td>{{ (1 - fatPercent(measurement)) * 100 }}% ({{ muscleWeight(measurement).toFixed(2) }}{{ kg }})</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div>Fat to lose: {{ fatToLose.toFixed(2) }}{{ kg }} (Weeks left: {{ weeksToFatGoal.toFixed(2) }})</div>
-    <div>Muscle to gain: {{ muscleToGain.toFixed(2) }}{{ kg }} (Weeks left: {{ weeksToMuscleGoal.toFixed(2) }})</div>
+    <div v-else>
+      Loading...
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import axios from "axios";
+axios.defaults.headers.post["Content-Type"] = "application/json";
+
+type User = {
+  id: string;
+  goalWeight: number;
+};
+
+type Measurement = {
+  id: string;
+  userId: string;
+  date: string; // date ISO
+  weight: number;
+  chest: number;
+  belly: number;
+  thigh: number;
+};
 
 @Component
 export default class Measurements extends Vue {
-  goalWeight = 79.5;
-  bodyWeight = 75.6;
+  async created() {
+    // get goal weight
+    try {
+      const response = await axios.get(`${this.apiURL}/users/${this.userId}`);
+      this.user = response.data;
+    } catch (error) {
+      console.error(error);
+    }
+
+    // get measurements
+    try {
+      const response = await axios.get(`${this.apiURL}/users/${this.userId}/measurements`);
+      this.measurements = response.data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  user: User = {
+    id: "0",
+    goalWeight: 0,
+  };
+
+  userId = "1";
+
+  measurements: Measurement[] = [];
+
+  initialNewMeasurement: Measurement = {
+    id: "",
+    userId: this.userId,
+    date: new Date().toISOString(),
+    weight: 0,
+    chest: 0,
+    belly: 0,
+    thigh: 0,
+  };
+
+  newMeasurement: Measurement = this.initialNewMeasurement;
+
   kg = "kg";
   lb = "lb";
   cm = "cm";
@@ -40,26 +132,55 @@ export default class Measurements extends Vue {
   kgInLb = 2.204623;
   cmInInch = 0.3937;
 
-  sizeChest = 0.9;
-  sizeBelly = 1.2;
-  sizeThigh = 1;
-
   fatLossPerWeekRate = 0.795454;
   muscleGainPerWeekRate = 0.1587573;
 
-  get bodyWeightLb() {
-    return this.bodyWeight * this.kgInLb;
+  get apiURL() {
+    return process.env.NODE_ENV === "development" ? "http://localhost:3000/api/v1" : "/api/v1";
   }
 
-  get sizeTotal() {
-    return this.sizeChest + this.sizeBelly + this.sizeThigh;
+  get goalWeightFat() {
+    return this.user.goalWeight * 0.1;
   }
 
-  get sizeTotalLb() {
-    return this.sizeTotal * this.cmInInch;
+  get muscleWeightGoal() {
+    return this.user.goalWeight * 0.9;
   }
 
-  get fatPercent() {
+  get fatWeightToLose() {
+    return this.fatWeight(this.measurements[0]) - this.goalWeightFat;
+  }
+
+  get weeksToFatGoal() {
+    return this.fatWeightToLose / this.fatLossPerWeekRate;
+  }
+
+  get muscleWeightToGain() {
+    return this.muscleWeightGoal - this.muscleWeight(this.measurements[0]);
+  }
+
+  get weeksToMuscleGoal() {
+    return this.muscleWeightToGain / this.muscleGainPerWeekRate;
+  }
+
+  async saveMeasurement() {
+    console.log("m", this.newMeasurement);
+    try {
+      const response = await axios.post(`${this.apiURL}/users/${this.userId}/measurements`, this.newMeasurement);
+      console.log(response.data);
+      this.measurements.unshift(this.newMeasurement);
+      this.newMeasurement = Object.assign({}, this.initialNewMeasurement);
+    } catch (error) {
+      console.error("Error:", error.response.data.message);
+    }
+  }
+
+  sizeTotal(measurement: Measurement): number {
+    return measurement.chest + measurement.belly + measurement.thigh;
+  }
+
+  fatPercent(measurement: Measurement): number {
+    const sizeTotal = this.sizeTotal(measurement);
     /*
       1 3/16'  = 1.1875' = 3.01625cm = 10%
       1 3/8'   = 1.375'  = 3.4925cm  = 11%
@@ -67,46 +188,28 @@ export default class Measurements extends Vue {
       1 3/4'   = 1.75'   = 4.445cm   = 13.5%
       2'       = 2'      = 5.08cm    = 15%
     */
-    if (this.sizeTotal <= 3.01625) return 0.1;
-    if (this.sizeTotal <= 3.4925) return 0.11;
-    if (this.sizeTotal <= 3.96875) return 0.12;
-    if (this.sizeTotal <= 4.445) return 0.13;
-    if (this.sizeTotal <= 5.08) return 0.15;
+    if (sizeTotal <= 3.01625) return 0.1;
+    if (sizeTotal <= 3.4925) return 0.11;
+    if (sizeTotal <= 3.96875) return 0.12;
+    if (sizeTotal <= 4.445) return 0.13;
+    if (sizeTotal <= 5.08) return 0.15;
     return 16.5; // or more
   }
 
-  get fatWeight() {
-    return this.fatPercent * this.bodyWeight;
+  fatWeight(measurement: Measurement) {
+    return this.fatPercent(measurement) * measurement.weight;
   }
 
-  get muscleWeight() {
-    return this.bodyWeight - this.fatWeight;
-  }
-
-  get fatWeightGoal() {
-    return this.goalWeight * 0.1;
-  }
-
-  get muscleWeightGoal() {
-    return this.goalWeight * 0.9;
-  }
-
-  get fatToLose() {
-    return this.fatWeight - this.fatWeightGoal;
-  }
-
-  get weeksToFatGoal() {
-    return this.fatToLose / this.fatLossPerWeekRate;
-  }
-
-  get muscleToGain() {
-    return this.muscleWeightGoal - this.muscleWeight;
-  }
-
-  get weeksToMuscleGoal() {
-    return this.muscleToGain / this.muscleGainPerWeekRate;
+  muscleWeight(measurement: Measurement) {
+    return measurement.weight - this.fatWeight(measurement);
   }
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.card {
+  padding: 1em;
+  border: 1px solid var(--color-heading);
+  margin-bottom: 1em;
+}
+</style>

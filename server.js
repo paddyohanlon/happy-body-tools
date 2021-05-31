@@ -1,6 +1,16 @@
 const express = require("express");
 const app = express();
 
+// Allow CORS for local dev
+if (process.env.NODE_ENV === "development") {
+  console.log("NODE_ENV = development");
+  app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
+}
+
 app.use(express.static("dist"));
 app.use(express.json());
 
@@ -28,7 +38,7 @@ app.get(`${apiURLBase}/users/:userId`, async (req, res) => {
         // console.log("Result", JSON.stringify(result, null, 2));
         res.send(result);
       } else {
-        res.status(404).send({ message: "Cannot find user" });
+        return res.status(404).send({ message: "Cannot find user" });
       }
     });
 });
@@ -40,7 +50,7 @@ app.post(`${apiURLBase}/users/:userId`, async (req, res) => {
   const userId = req.params.userId;
 
   if (typeof req.body.goalWeight !== "number") {
-    res.status(403).send({ message: "Goal weight should be a number" });
+    return res.status(400).send({ message: "Goal weight should be a number" });
   }
 
   const user = {
@@ -79,6 +89,7 @@ app.get(`${apiURLBase}/users/:userId/measurements`, async (req, res) => {
 
   // Get measurements
   r.table(measurementsTable)
+    .orderBy({ index: r.desc("date") })
     .filter(r.row("userId").eq(userId))
     .run(conn, (err, cursor) => {
       if (err) throw err;
@@ -86,15 +97,15 @@ app.get(`${apiURLBase}/users/:userId/measurements`, async (req, res) => {
         if (err) throw err;
         if (result) {
           // console.log("Result", JSON.stringify(result, null, 2));
-          res.send(result);
+          return res.send(result);
         } else {
-          res.status(404).send({ message: "Cannot find measurements" });
+          return res.status(404).send({ message: "Cannot find measurements" });
         }
       });
     });
 });
 
-app.post(`${apiURLBase}/users/:userId/measurements`, async (req, res) => {
+app.post(`${apiURLBase}/users/:userId/measurements`, async (req, res, next) => {
   const userId = req.params.userId;
 
   console.log("Add measurement for user", userId);
@@ -118,7 +129,7 @@ app.post(`${apiURLBase}/users/:userId/measurements`, async (req, res) => {
   }
 
   if (userId !== req.body.userId) {
-    res.status(403).send({ message: "User IDs do not match" });
+    return res.status(400).send({ message: "User IDs do not match" });
   }
 
   if (
@@ -129,7 +140,9 @@ app.post(`${apiURLBase}/users/:userId/measurements`, async (req, res) => {
     typeof req.body.belly !== "number" ||
     typeof req.body.thigh !== "number"
   ) {
-    res.status(403).send({ message: "Measurement values should all be numbers" });
+    // throw new Error("Measurement values should all be numbers");
+    // next(new Error("Measurement values should all be numbers"));
+    return res.status(400).send({ message: "Measurement values should all be numbers" });
   }
 
   const measurement = {

@@ -31,6 +31,11 @@ r.connect(
       // Table missing --> create
       console.log(`Creating ${measurementsTable} table`);
       await r.tableCreate(measurementsTable).run(conn);
+      await r
+        .table(measurementsTable)
+        .indexCreate("date")
+        .run(conn);
+      console.log("Creating date secondary index -- done");
       console.log(`Creating ${measurementsTable} table -- done`);
     }
 
