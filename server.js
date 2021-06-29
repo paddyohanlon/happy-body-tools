@@ -74,18 +74,19 @@ app.get(`${apiURLBase}/users/:userId`, async (req, res) => {
 });
 
 app.post(`${apiURLBase}/users/:userId`, async (req, res) => {
-  console.log("Update user");
+  console.log("Create/Update user");
   console.log("req.body", req.body);
 
   const userId = req.params.userId;
 
-  if (typeof req.body.goalWeight !== "number") {
-    return res.status(400).send({ message: "Goal weight should be a number" });
+  if (typeof req.body.idealWeight !== "number" || typeof req.body.height !== "number") {
+    return res.status(400).send({ message: "Ideal weight and height should be numbers" });
   }
 
   const user = {
     id: userId,
-    goalWeight: req.body.goalWeight,
+    idealWeight: req.body.idealWeight,
+    height: req.body.height,
   };
 
   const conn = await getRethinkDB();
