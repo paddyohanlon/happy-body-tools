@@ -1,10 +1,18 @@
-# Some unofficial tools for The Happy Body Program
+# The Happy Body Tracker
 
-Touching to force redeploy.
+To run locally run the following in three separate terminal tabs:
 
-Currently there is only one tool (not tools), but I expect to add more.
+```
+rethinkdb --http-port 5000
+```
 
-The one and only tool helps calculates the different weight percentages and dumbbells required to perform the Happy Body workout, which I made just because I got tired of doing the mental math.
+```
+NODE_ENV=development node server.js
+```
+
+```
+npm run serve
+```
 
 ## RethinkDB
 
@@ -13,6 +21,14 @@ Backup:
 ```
 rethinkdb dump -f backup.tar.gz
 ```
+
+Run in development:
+
+```
+rethinkdb --http-port 5000
+```
+
+Set port other than `8080` because I usually have something already running on 8080.
 
 ## Express server backend API
 
